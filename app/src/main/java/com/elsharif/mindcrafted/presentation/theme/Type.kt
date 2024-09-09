@@ -1,4 +1,4 @@
-package com.elsharif.mindcrafted.ui.theme
+package com.elsharif.mindcrafted.presentation.theme
 
 import com.elsharif.mindcrafted.R
 

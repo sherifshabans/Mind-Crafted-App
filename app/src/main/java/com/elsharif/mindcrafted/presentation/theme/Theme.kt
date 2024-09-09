@@ -1,4 +1,4 @@
-package com.elsharif.mindcrafted.ui.theme
+package com.elsharif.mindcrafted.presentation.theme
 
 import android.app.Activity
 import android.os.Build
@@ -81,7 +81,7 @@ private val darkColors = darkColorScheme(
 )
 
 @Composable
-fun StudySmartTheme(
+fun MindCraftedTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,

@@ -1,4 +1,4 @@
-package com.elsharif.mindcrafted.ui.theme
+package com.elsharif.mindcrafted.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
