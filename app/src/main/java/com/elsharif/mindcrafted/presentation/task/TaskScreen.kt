@@ -29,10 +29,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -41,13 +44,30 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.elsharif.mindcrafted.presentation.components.DeleteDialog
+import com.elsharif.mindcrafted.presentation.components.SubjectListBottomSheet
 import com.elsharif.mindcrafted.presentation.components.TaskCheckBox
+import com.elsharif.mindcrafted.presentation.components.TaskDatePicker
+import com.elsharif.mindcrafted.subject
 import com.elsharif.mindcrafted.util.Priority
+import com.elsharif.mindcrafted.util.changeMillisToDateString
+import kotlinx.coroutines.launch
+import java.time.Instant
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskScreen() {
 
     var isDeleteDialogOpen by rememberSaveable { mutableStateOf(false) }
+
+    var isDatePickerDialogOpen by rememberSaveable { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = Instant.now().toEpochMilli()
+    )
+
+    val sheetState = rememberModalBottomSheetState()
+    var isBottomSheetOpen by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var taskTitleError by rememberSaveable {
@@ -69,7 +89,33 @@ fun TaskScreen() {
         onConfirmRequest = {
             isDeleteDialogOpen=false
         }
-        )
+    )
+    TaskDatePicker(
+        state = datePickerState,
+        isOpen = isDatePickerDialogOpen,
+        onDismissRequest = {
+            isDatePickerDialogOpen =false
+        },
+        onConfirmButtonClicked = {
+            isDatePickerDialogOpen =false
+        }
+    )
+
+    SubjectListBottomSheet(
+        sheetState = sheetState,
+        isOpen = isBottomSheetOpen,
+        subjects = subject,
+        onDismissRequest = {isBottomSheetOpen =false},
+        onSubjectClicked = {
+            scope.launch {
+                sheetState.hide()
+            }.invokeOnCompletion {
+                if(!sheetState.isVisible)isBottomSheetOpen = false
+            }
+
+        }
+    )
+
     Scaffold (
         topBar = {
             TaskScreenTopBar(
@@ -121,10 +167,12 @@ fun TaskScreen() {
             ){
 
                 Text(
-                    text = "11 sep , 2024 ",
+                    text = datePickerState.selectedDateMillis.changeMillisToDateString(),
                     style = MaterialTheme.typography.bodyLarge
                 )
-                IconButton(onClick = { /*TODO*/ }) {
+                IconButton(onClick = {
+                    isDatePickerDialogOpen =true
+                }) {
                     Icon(
                         imageVector = Icons.Default.DateRange,
                         contentDescription = "Select Due Date")
@@ -172,7 +220,7 @@ fun TaskScreen() {
                     text = "Math",
                     style = MaterialTheme.typography.bodyLarge
                 )
-                IconButton(onClick = { /*TODO*/ }) {
+                IconButton(onClick = { isBottomSheetOpen =true }) {
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
                         contentDescription = "Select Subject")
