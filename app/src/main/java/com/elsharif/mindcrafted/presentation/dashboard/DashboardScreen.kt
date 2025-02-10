@@ -50,14 +50,51 @@ import com.elsharif.mindcrafted.presentation.components.DeleteDialog
 import com.elsharif.mindcrafted.presentation.components.SubjectCard
 import com.elsharif.mindcrafted.presentation.components.studySessionsList
 import com.elsharif.mindcrafted.presentation.components.tasksList
+import com.elsharif.mindcrafted.presentation.destinations.SessionScreenRouteDestination
+import com.elsharif.mindcrafted.presentation.destinations.SubjectScreenRouteDestination
+import com.elsharif.mindcrafted.presentation.destinations.TaskScreenRouteDestination
+import com.elsharif.mindcrafted.presentation.subject.SubjectScreenNavArgs
+import com.elsharif.mindcrafted.presentation.task.TaskScreenNavArgs
 import com.elsharif.mindcrafted.sessions
 import com.elsharif.mindcrafted.subject
 import com.elsharif.mindcrafted.tasks
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 
+@Destination(start = true)
+@Composable
+fun DashboardScreenRoute(
+    navigator :DestinationsNavigator
+) {
+    DashboardScreen(
+        onSubjectCardClick = { subjectId->
+            subjectId?.let {
+                val navArg = SubjectScreenNavArgs(subjectId=subjectId)
+                navigator.navigate(SubjectScreenRouteDestination(navArgs = navArg))
+            }
+
+        },
+        onTaskCardClick = { taskId->
+            taskId?.let {
+                val navArg = TaskScreenNavArgs(taskId=taskId,subjectId = null)
+                navigator.navigate(TaskScreenRouteDestination(navArgs = navArg))
+            }
+
+        },
+        onStartSessionButtonClick ={
+            navigator.navigate(SessionScreenRouteDestination())
+
+        }
+        )
+}
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun DashboardScreen() {
+private fun DashboardScreen(
+    onSubjectCardClick: (Int?) ->Unit,
+    onTaskCardClick: (Int?)->Unit,
+    onStartSessionButtonClick: ()->Unit
+) {
 
 
     var isAddSubjectDialogOpen by rememberSaveable {
@@ -123,15 +160,14 @@ fun DashboardScreen() {
                 SubjectCardsSection(
                     modifier =Modifier.fillMaxWidth(),
                     subjectList = subject,
-                    onAddIconClick = {
-                        isAddSubjectDialogOpen =true
-                    }
+                    onAddIconClick = { isAddSubjectDialogOpen =true },
+                    onSubjectCardClick = onSubjectCardClick
                 )
             }
 
             item {
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = onStartSessionButtonClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 48.dp, vertical = 48.dp)
@@ -145,7 +181,7 @@ fun DashboardScreen() {
                         "Click the + button in the subject screen to add new task.",
                 tasks = tasks,
                 onCheckBoxClick = {},
-                onTaskCardClick = {}
+                onTaskCardClick = onTaskCardClick
             )
 
             item { 
@@ -214,7 +250,8 @@ private fun SubjectCardsSection(
     modifier: Modifier,
     subjectList: List<Subject>,
     emptyListText:String="You don't have any subject.\n Click the + button to add new subject.",
-    onAddIconClick:()->Unit
+    onAddIconClick:()->Unit,
+    onSubjectCardClick:(Int?)->Unit
 ){
     Column(
         modifier=modifier
@@ -265,7 +302,7 @@ private fun SubjectCardsSection(
                 SubjectCard(
                     subjectName =subject.name,
                     gradientColors =subject.colors,
-                    onClick = {}
+                    onClick = {onSubjectCardClick(subject.subjectId)}
                 )
 
             }

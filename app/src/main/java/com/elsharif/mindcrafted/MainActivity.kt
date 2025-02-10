@@ -10,8 +10,10 @@ import androidx.compose.ui.Modifier
 import com.elsharif.mindcrafted.domain.model.Session
 import com.elsharif.mindcrafted.domain.model.Subject
 import com.elsharif.mindcrafted.domain.model.Task
-import com.elsharif.mindcrafted.presentation.dashboard.DashboardScreen
+import com.elsharif.mindcrafted.presentation.NavGraph
+import com.elsharif.mindcrafted.presentation.NavGraphs
 import com.elsharif.mindcrafted.presentation.theme.MindCraftedTheme
+import com.ramcosta.composedestinations.DestinationsNavHost
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,7 +21,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MindCraftedTheme {
-                DashboardScreen()
+
+                DestinationsNavHost(navGraph = NavGraphs.root)
+
             }
         }
     }

@@ -41,12 +41,29 @@ import com.elsharif.mindcrafted.presentation.components.SubjectListBottomSheet
 import com.elsharif.mindcrafted.presentation.components.studySessionsList
 import com.elsharif.mindcrafted.sessions
 import com.elsharif.mindcrafted.subject
+import com.ramcosta.composedestinations.annotation.Destination
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
+
+
+@Destination
+@Composable
+fun SessionScreenRoute(
+    navigator: DestinationsNavigator
+) {
+    SessionScreen(
+        onBackButtonClick = {
+            navigator.navigateUp()
+        }
+    )
+}
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SessionScreen() {
+private fun SessionScreen(
+    onBackButtonClick: () -> Unit
+) {
 
     val sheetState = rememberModalBottomSheetState()
     var isBottomSheetOpen by remember { mutableStateOf(false) }
@@ -80,7 +97,7 @@ fun SessionScreen() {
 
 
     Scaffold(
-        topBar = { SessionScreenTopBar(onBackButtonClick = {}) }
+        topBar = { SessionScreenTopBar(onBackButtonClick = onBackButtonClick) }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
