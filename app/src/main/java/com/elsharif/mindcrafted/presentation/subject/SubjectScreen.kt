@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.elsharif.mindcrafted.domain.model.Subject
 import com.elsharif.mindcrafted.presentation.components.AddSubjectDialog
 import com.elsharif.mindcrafted.presentation.components.CountCard
@@ -48,6 +49,7 @@ import com.elsharif.mindcrafted.presentation.components.DeleteDialog
 import com.elsharif.mindcrafted.presentation.components.studySessionsList
 import com.elsharif.mindcrafted.presentation.components.tasksList
 import com.elsharif.mindcrafted.presentation.destinations.TaskScreenRouteDestination
+import com.elsharif.mindcrafted.presentation.session.SessionViewModel
 import com.elsharif.mindcrafted.presentation.task.TaskScreenNavArgs
 import com.elsharif.mindcrafted.sessions
 import com.elsharif.mindcrafted.tasks
@@ -63,6 +65,9 @@ data class SubjectScreenNavArgs(
 fun SubjectScreenRoute(
     navigator: DestinationsNavigator
 ) {
+
+    val viewModel : SubjectViewModel = hiltViewModel()
+
     SubjectScreen(
         onBackButtonClick = { navigator.navigateUp() },
         onAddTaskButtonClick = {

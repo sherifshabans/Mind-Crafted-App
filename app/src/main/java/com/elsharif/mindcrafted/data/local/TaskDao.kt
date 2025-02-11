@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 interface TaskDao {
 
     @Upsert
-    suspend fun updateTask(task: Task)
+    suspend fun upsertTask(task: Task)
 
     @Query("DELETE  FROM Task WHERE taskId =:taskId")
     suspend fun deleteTask(taskId: Int)

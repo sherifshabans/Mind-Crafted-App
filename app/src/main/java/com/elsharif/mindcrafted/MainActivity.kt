@@ -14,7 +14,9 @@ import com.elsharif.mindcrafted.presentation.NavGraph
 import com.elsharif.mindcrafted.presentation.NavGraphs
 import com.elsharif.mindcrafted.presentation.theme.MindCraftedTheme
 import com.ramcosta.composedestinations.DestinationsNavHost
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

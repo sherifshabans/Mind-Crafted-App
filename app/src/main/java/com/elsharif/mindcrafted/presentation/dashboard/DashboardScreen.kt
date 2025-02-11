@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.elsharif.mindcrafted.R
 import com.elsharif.mindcrafted.domain.model.Session
 import com.elsharif.mindcrafted.domain.model.Subject
@@ -66,6 +67,10 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 fun DashboardScreenRoute(
     navigator :DestinationsNavigator
 ) {
+
+    val viewModel:DashboardViewModel = hiltViewModel()
+
+
     DashboardScreen(
         onSubjectCardClick = { subjectId->
             subjectId?.let {
