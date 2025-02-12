@@ -103,20 +103,21 @@ fun AddSubjectDialog(
                    }
                    OutlinedTextField(
                        value = subjectName,
-                       onValueChange ={onSubjectNameChange},
+                       onValueChange =onSubjectNameChange,
                        label = { Text(text = "Subject Name")},
                        singleLine = true,
                        isError = subjectNameError !=null &&subjectName.isNotBlank(),
                        supportingText = { Text(text = subjectNameError.orEmpty())}
                    )
+
                    Spacer(modifier = Modifier.height(10.dp))
 
                    OutlinedTextField(
                        value = goalHours,
-                       onValueChange ={onGoalHoursChange},
+                       onValueChange =onGoalHoursChange,
                        label = { Text(text = "Goal Study Hours")},
                        singleLine = true,
-                       isError = goalHours !=null && goalHours.isNotBlank(),
+                       isError = goalHours != null && goalHours.isNotBlank(),
                        supportingText = { Text(text = goalHoursError.orEmpty())},
                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                    )
@@ -128,7 +129,6 @@ fun AddSubjectDialog(
             }
         },
         confirmButton = {
-
                         TextButton(
                             onClick =onConfirmRequest,
                             enabled = subjectNameError==null &&goalHoursError==null

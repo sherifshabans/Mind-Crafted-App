@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import com.elsharif.mindcrafted.domain.model.Session
 import com.elsharif.mindcrafted.domain.model.Subject
 import com.elsharif.mindcrafted.domain.model.Task
@@ -32,11 +33,11 @@ class MainActivity : ComponentActivity() {
 }
 
 val subject= listOf(
-    Subject(name = "Math", goalHours = 8f, colors = Subject.subjectCardColors[0], subjectId = 0),
-    Subject(name = "Math2", goalHours = 4f, colors = Subject.subjectCardColors[1], subjectId = 0),
-    Subject(name = "Math3", goalHours = 2f, colors = Subject.subjectCardColors[2], subjectId = 0),
-    Subject(name = "Math4", goalHours = 3f, colors = Subject.subjectCardColors[3], subjectId = 1),
-    Subject(name = "Math5", goalHours = 1f, colors = Subject.subjectCardColors[4], subjectId = 2),
+    Subject(name = "Math", goalHours = 8f, colors = Subject.subjectCardColors[0].map { it.toArgb() }, subjectId = 0),
+    Subject(name = "Math2", goalHours = 4f, colors = Subject.subjectCardColors[1].map { it.toArgb() }, subjectId = 0),
+    Subject(name = "Math3", goalHours = 2f, colors = Subject.subjectCardColors[2].map { it.toArgb() }, subjectId = 0),
+    Subject(name = "Math4", goalHours = 3f, colors = Subject.subjectCardColors[3].map { it.toArgb() }, subjectId = 1),
+    Subject(name = "Math5", goalHours = 1f, colors = Subject.subjectCardColors[4].map { it.toArgb() }, subjectId = 2),
 )
 val tasks = listOf(
     Task(
