@@ -69,6 +69,8 @@ fun SubjectScreenRoute(
     val viewModel : SubjectViewModel = hiltViewModel()
 
     SubjectScreen(
+        state = ,
+        onEvent = ,
         onBackButtonClick = { navigator.navigateUp() },
         onAddTaskButtonClick = {
                 val navArg = TaskScreenNavArgs(taskId=null,subjectId = -1)
@@ -87,6 +89,8 @@ fun SubjectScreenRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SubjectScreen(
+    state: SubjectState,
+    onEvent: (SubjectEvent)->Unit,
     onBackButtonClick: ()->Unit,
     onAddTaskButtonClick :()->Unit,
     onTaskCardClick: (Int?)->Unit
@@ -95,57 +99,60 @@ private fun SubjectScreen(
 
     val scrollBehavior=TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val listState = rememberLazyListState()
-    val isFABExpended by remember {
-        derivedStateOf { listState.firstVisibleItemIndex==0  }
-    }
-    var isAddSubjectDialogOpen by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var isDeleteSubjectDialogOpen by rememberSaveable {
-        mutableStateOf(false)
-    }
-    var isEditSubjectDialogOpen by rememberSaveable {
-        mutableStateOf(false)
-    }
+    val isFABExpended by remember { derivedStateOf { listState.firstVisibleItemIndex==0  } }
+    var isAddSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
+    var isDeleteSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
+    var isEditSubjectDialogOpen by rememberSaveable { mutableStateOf(false) }
+    var isDeleteSessionDialogOpen by rememberSaveable { mutableStateOf(false) }
 
-    var subjectName by remember {
-        mutableStateOf("")
-    }
-    var goalHours by remember {
-        mutableStateOf("")
-    }
-    var selectedColor by remember {
-        mutableStateOf(Subject.subjectCardColors.random())
-    }
+
+
     AddSubjectDialog(
         isOpen = isAddSubjectDialogOpen,
         onDismissRequest = { isAddSubjectDialogOpen=false},
         onConfirmRequest = {
+            onEvent(SubjectEvent.UpdateSubject)
             isAddSubjectDialogOpen=true
         },
-        subjectName = subjectName,
-        goalHours = goalHours,
-        onSubjectNameChange ={subjectName=it} ,
-        onGoalHoursChange = {goalHours=it},
-        selectedColor = selectedColor,
-        onColorChange = {selectedColor=it},
+        subjectName = state.subjectName,
+        goalHours = state.goalStudyHours,
+        onSubjectNameChange ={onEvent(SubjectEvent.OnSubjectNameChange(it))} ,
+        onGoalHoursChange = {onEvent(SubjectEvent.OnGoalStudyHoursChange(it))},
+        selectedColor = state.subjectCardColors,
+        onColorChange = {onEvent(SubjectEvent.OnSubjectCardColorChange(it))},
 
         )
 
     DeleteDialog(
         isOpen = isDeleteSubjectDialogOpen,
-        title ="Delete Subject",
+        title ="Delete Subject?",
         bodyText ="Are you sure , you want to delete this subject? All related" +
                 "tasks and study sessions will be permanently removed. this action can not be undone",
         onDismissRequest = { isAddSubjectDialogOpen=false },
-        onConfirmRequest = { isAddSubjectDialogOpen=false },
+        onConfirmRequest = {
+            onEvent(SubjectEvent.DeleteSubject)
+            isAddSubjectDialogOpen=false },
     )
+
+
+    DeleteDialog(
+        isOpen = isDeleteSessionDialogOpen,
+        title = "Delete Session?",
+        bodyText = "Are you sure, you want to delete this session? Your studied hours will be reduced " +
+                "by this session time. This action can not be undone.",
+        onDismissRequest = { isDeleteSessionDialogOpen = false },
+        onConfirmRequest = {
+            onEvent(SubjectEvent.DeleteSession)
+            isDeleteSessionDialogOpen = false
+        }
+    )
+
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             SubjectScreenTopBar(
-                title = "Math",
+                title = state.subjectName,
                 onBackButtonClick = onBackButtonClick,
                 onDeleteButtonClick = { isDeleteSubjectDialogOpen=true },
                 onEditButtonClick = {isEditSubjectDialogOpen=true},
@@ -175,17 +182,17 @@ private fun SubjectScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(12.dp),
-                    studiedHours ="10",
-                    goalHours ="5",
-                    progress =.75f
+                    studiedHours =state.goalStudyHours,
+                    goalHours = state.studiedHours.toString(),
+                    progress =state.progress
                 )
             }
             tasksList(
                 sectionTitle = "UPCOMING TASKS",
                 emptyListText = "You don't have any upcoming tasks. \n " +
                         "Click the + button  to add new task.",
-                tasks = tasks,
-                onCheckBoxClick = {},
+                tasks = state.upcomingTasks,
+                onCheckBoxClick = {onEvent(SubjectEvent.OnTaskIsCompleteChange(it))},
                 onTaskCardClick = onTaskCardClick
             )
 
@@ -196,8 +203,8 @@ private fun SubjectScreen(
                 sectionTitle = "Completed TASKS",
                 emptyListText = "You don't have any complete tasks. \n " +
                         "Click the check box on completion of tasks.",
-                tasks = tasks,
-                onCheckBoxClick = {},
+                tasks = state.completedTasks,
+                onCheckBoxClick = {onEvent(SubjectEvent.OnTaskIsCompleteChange(it))},
                 onTaskCardClick = onTaskCardClick
             )
             item {
@@ -207,8 +214,11 @@ private fun SubjectScreen(
                 sectionTitle = "RECENT STUDY SESSIONS",
                 emptyListText = "You don't have any recent sessions. \n " +
                         "Start a study session to begin recording your progress .",
-                sessions = sessions,
-                onDeleteItemClick = {isDeleteSubjectDialogOpen=true}
+                sessions = state.recentSessions,
+                onDeleteItemClick = {
+                    isDeleteSubjectDialogOpen=true
+                    onEvent(SubjectEvent.OnDeleteSessionButtonClick(it))
+                }
             )
 
         }
