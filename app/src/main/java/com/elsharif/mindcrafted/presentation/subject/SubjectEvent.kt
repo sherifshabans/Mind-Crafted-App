@@ -12,6 +12,8 @@ sealed class SubjectEvent {
 
     data object DeleteSession:SubjectEvent()
 
+    data object UpdateProgress:SubjectEvent()
+
     data class OnTaskIsCompleteChange(val task: Task):SubjectEvent()
 
     data class OnSubjectCardColorChange(val color:List<Color>): SubjectEvent()

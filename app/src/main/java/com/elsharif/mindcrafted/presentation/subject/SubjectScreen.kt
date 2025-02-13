@@ -25,10 +25,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +45,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.elsharif.mindcrafted.domain.model.Subject
 import com.elsharif.mindcrafted.presentation.components.AddSubjectDialog
 import com.elsharif.mindcrafted.presentation.components.CountCard
@@ -53,8 +57,11 @@ import com.elsharif.mindcrafted.presentation.session.SessionViewModel
 import com.elsharif.mindcrafted.presentation.task.TaskScreenNavArgs
 import com.elsharif.mindcrafted.sessions
 import com.elsharif.mindcrafted.tasks
+import com.elsharif.mindcrafted.util.SnackbarEvent
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.collectLatest
 
 data class SubjectScreenNavArgs(
     val subjectId :Int
@@ -68,9 +75,12 @@ fun SubjectScreenRoute(
 
     val viewModel : SubjectViewModel = hiltViewModel()
 
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
     SubjectScreen(
-        state = ,
-        onEvent = ,
+        state = state,
+        onEvent = viewModel::onEvent,
+        snackbarEvent = viewModel.snackbarEventFlow,
         onBackButtonClick = { navigator.navigateUp() },
         onAddTaskButtonClick = {
                 val navArg = TaskScreenNavArgs(taskId=null,subjectId = -1)
@@ -91,6 +101,7 @@ fun SubjectScreenRoute(
 private fun SubjectScreen(
     state: SubjectState,
     onEvent: (SubjectEvent)->Unit,
+    snackbarEvent: SharedFlow<SnackbarEvent>,
     onBackButtonClick: ()->Unit,
     onAddTaskButtonClick :()->Unit,
     onTaskCardClick: (Int?)->Unit
@@ -106,6 +117,28 @@ private fun SubjectScreen(
     var isDeleteSessionDialogOpen by rememberSaveable { mutableStateOf(false) }
 
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(key1 = true) {
+        snackbarEvent.collectLatest { event->
+            when(event){
+                is SnackbarEvent.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(
+                        message = event.message,
+                        duration = event.duration
+                    )
+                }
+
+                SnackbarEvent.NavigateUp -> {
+                    onBackButtonClick()
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = state.studiedHours, key2 = state.goalStudyHours) {
+        onEvent(SubjectEvent.UpdateProgress)
+    }
 
     AddSubjectDialog(
         isOpen = isAddSubjectDialogOpen,
@@ -149,6 +182,7 @@ private fun SubjectScreen(
 
 
     Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             SubjectScreenTopBar(
@@ -239,7 +273,7 @@ private fun SubjectScreenTopBar(
     LargeTopAppBar(
         scrollBehavior =scrollBehavior ,
         navigationIcon = {
-            IconButton(onClick = { onBackButtonClick }) {
+            IconButton(onClick = onBackButtonClick) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription ="navigate back" )
 
             }
@@ -251,14 +285,14 @@ private fun SubjectScreenTopBar(
             style = MaterialTheme.typography.headlineSmall
         ) },
         actions = {
-            IconButton(onClick = { onDeleteButtonClick }) {
+            IconButton(onClick =  onDeleteButtonClick ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Delete Subject"
                 )
 
             }
-            IconButton(onClick = { onEditButtonClick }) {
+            IconButton(onClick = onEditButtonClick ) {
                 Icon(
                     imageVector = Icons.Default.Edit,
                     contentDescription = "Edit Subject"
@@ -281,6 +315,7 @@ private fun SubjectOverview(
     val percentageProgress = remember(progress) {
         (progress*100).toInt().coerceIn(0,100)
     }
+
     Row (
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceAround,

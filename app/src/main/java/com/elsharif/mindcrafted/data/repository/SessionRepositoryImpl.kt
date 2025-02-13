@@ -27,14 +27,14 @@ class SessionRepositoryImpl @Inject constructor(
     }
 
     override fun getRecentTenSessionForSubject(subjectId: Int): Flow<List<Session>> {
-        TODO("Not yet implemented")
+        return sessionDao.getRecentSessionsForSubject(subjectId).take(count = 10)
     }
 
     override fun getTotalSessionDuration(): Flow<Long> {
         return sessionDao.getTotalSessionsDuration()
     }
 
-    override fun getTotalSessionDurationBySubjectId(subjectId: Int) {
-        TODO("Not yet implemented")
+    override fun getTotalSessionDurationBySubjectId(subjectId: Int):Flow<Long> {
+        return sessionDao.getTotalSessionsDurationBySubject(subjectId)
     }
 }
