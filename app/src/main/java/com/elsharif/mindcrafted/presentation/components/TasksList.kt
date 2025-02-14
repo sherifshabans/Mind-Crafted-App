@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.elsharif.mindcrafted.R
 import com.elsharif.mindcrafted.domain.model.Task
 import com.elsharif.mindcrafted.util.Priority
+import com.elsharif.mindcrafted.util.changeMillisToDateString
 
 fun LazyListScope.tasksList(
     sectionTitle:String,
@@ -125,7 +126,7 @@ private fun TaskCard(
                     )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "${task.dueDate}",
+                    text = task.dueDate.changeMillisToDateString(),
                     style = MaterialTheme.typography.bodySmall)
 
             }

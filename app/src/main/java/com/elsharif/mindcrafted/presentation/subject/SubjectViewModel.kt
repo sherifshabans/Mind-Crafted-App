@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.elsharif.mindcrafted.domain.model.Subject
+import com.elsharif.mindcrafted.domain.model.Task
 import com.elsharif.mindcrafted.domain.repository.SessionRepository
 import com.elsharif.mindcrafted.domain.repository.SubjectRepository
 import com.elsharif.mindcrafted.domain.repository.TaskRepository
@@ -90,7 +91,9 @@ class SubjectViewModel @Inject constructor(
             SubjectEvent.DeleteSubject -> deleteSubject()
             SubjectEvent.DeleteSession -> TODO()
             is SubjectEvent.OnDeleteSessionButtonClick -> TODO()
-            is SubjectEvent.OnTaskIsCompleteChange -> TODO()
+            is SubjectEvent.OnTaskIsCompleteChange -> {
+                updateTask(event.task)
+            }
             SubjectEvent.UpdateProgress -> {
                 val goalStudyHours = state.value.goalStudyHours.toFloatOrNull() ?: 1f
                 _state.update {
@@ -101,6 +104,43 @@ class SubjectViewModel @Inject constructor(
             }
         }
     }
+    private fun updateTask(task: Task) {
+
+        viewModelScope.launch {
+            try {
+                taskRepository.upsertTask(
+                    task=task.copy(isComplete = !task.isComplete)
+                )
+                if (task.isComplete){
+
+                    _snackbarEventFlow.emit(
+                        SnackbarEvent.ShowSnackbar(
+                            "Saved in upcoming tasks."
+                        )
+                    )
+                }else {
+
+                    _snackbarEventFlow.emit(
+                        SnackbarEvent.ShowSnackbar(
+                            "Saved in completed tasks."
+                        )
+                    )
+                }
+
+            } catch (e:Exception){
+
+                _snackbarEventFlow.emit(
+                    SnackbarEvent.ShowSnackbar(
+                        "Couldn't update task. ${e.message}",
+                        SnackbarDuration.Long
+                    )
+                )
+
+            }
+
+        }
+    }
+
 
     private fun updateSubject() {
         viewModelScope.launch {

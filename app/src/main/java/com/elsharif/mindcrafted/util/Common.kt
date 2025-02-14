@@ -19,6 +19,7 @@ enum class Priority(val title:String,val color:Color,val value:Int){
     companion object{
         fun fromInt(value: Int)= values().firstOrNull{it.value==value}?:MEDIUM
     }
+
 }
 
 fun Long?.changeMillisToDateString(): String {
