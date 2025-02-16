@@ -1,5 +1,14 @@
 package com.elsharif.mindcrafted.presentation.session
 
+import android.content.Intent
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,6 +43,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,17 +52,31 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.elsharif.mindcrafted.presentation.components.DeleteDialog
 import com.elsharif.mindcrafted.presentation.components.SubjectListBottomSheet
 import com.elsharif.mindcrafted.presentation.components.studySessionsList
+import com.elsharif.mindcrafted.presentation.theme.Red
 import com.elsharif.mindcrafted.sessions
 import com.elsharif.mindcrafted.subject
+import com.elsharif.mindcrafted.util.Constants.ACTION_SERVICE_CANCEL
+import com.elsharif.mindcrafted.util.Constants.ACTION_SERVICE_START
+import com.elsharif.mindcrafted.util.Constants.ACTION_SERVICE_STOP
+import com.ramcosta.composedestinations.annotation.DeepLink
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.launch
+import kotlin.time.Duration
 
 
-@Destination
+@Destination(
+    deepLinks = [
+        DeepLink(
+            action = Intent.ACTION_VIEW,
+            uriPattern = "mind_crafted://dashboard/session"
+        )
+    ]
+)
 @Composable
 fun SessionScreenRoute(
-    navigator: DestinationsNavigator
+    navigator: DestinationsNavigator,
+    timerServices: StudySessionTimerServices
 ) {
 
     val viewModel :SessionViewModel = hiltViewModel()
@@ -59,7 +85,8 @@ fun SessionScreenRoute(
     SessionScreen(
         onBackButtonClick = {
             navigator.navigateUp()
-        }
+        },
+        timerServices = timerServices
     )
 }
 
@@ -67,8 +94,20 @@ fun SessionScreenRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SessionScreen(
-    onBackButtonClick: () -> Unit
+    onBackButtonClick: () -> Unit,
+    timerServices: StudySessionTimerServices
+
 ) {
+
+    val hours by timerServices.hours
+    val minutes by timerServices.minutes
+    val seconds by timerServices.seconds
+
+    val currentTimerServices by timerServices.currentTimerState
+
+
+
+    val context = LocalContext.current
 
     val sheetState = rememberModalBottomSheetState()
     var isBottomSheetOpen by remember { mutableStateOf(false) }
@@ -114,7 +153,10 @@ private fun SessionScreen(
             item{
                 TimeSection(modifier = Modifier
                     .fillMaxSize()
-                    .aspectRatio(1f)
+                    .aspectRatio(1f),
+                    hours =hours,
+                    minutes=minutes,
+                    seconds=seconds
                 )
             }
             item {
@@ -130,9 +172,29 @@ private fun SessionScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(12.dp),
-                    startButtonClick = {},
-                    cancelButtonClick = {},
-                    finishButtonClick = {}
+                    startButtonClick = {
+                        ServiceHelper.triggerForegroundService(
+                            context =context,
+                            action =
+                        if(currentTimerServices==TimerState.STARTED){
+                            ACTION_SERVICE_STOP
+                        }else     ACTION_SERVICE_START
+                        )
+                    },
+                    cancelButtonClick = {
+                        ServiceHelper.triggerForegroundService(
+                            context =context,
+                            action = ACTION_SERVICE_CANCEL
+                        )
+                    },
+                    finishButtonClick = {
+                        ServiceHelper.triggerForegroundService(
+                            context =context,
+                            action = ACTION_SERVICE_CANCEL
+                        )
+                    },
+                    timerState = currentTimerServices,
+                    seconds = seconds
                 )
             }
 
@@ -170,7 +232,10 @@ private fun SessionScreenTopBar(
 
 @Composable
 private fun TimeSection(
-    modifier: Modifier
+    modifier: Modifier,
+    hours:String,
+    minutes:String,
+    seconds:String
 ) {
     Box(
         modifier=modifier,
@@ -180,8 +245,45 @@ private fun TimeSection(
             .size(250.dp)
             .border(5.dp, MaterialTheme.colorScheme.surfaceVariant, CircleShape)
         )
+        Row {
+            AnimatedContent(
+                targetState =hours,
+                label = hours,
+                transitionSpec = {timerTextAnimation()}
+            ) {hours->
+                Text(text = "$hours:",
+                    style = MaterialTheme
+                        .typography
+                        .titleLarge
+                        .copy(fontSize = 45.sp)
+                )
+            }
+            AnimatedContent(
+                targetState =minutes,
+                label = minutes ,
+                transitionSpec = {timerTextAnimation()}
+            ) {minutes->
+                Text(text = "$minutes:",
+                    style = MaterialTheme
+                        .typography
+                        .titleLarge
+                        .copy(fontSize = 45.sp)
+                )
+            }
+            AnimatedContent(
+                targetState =seconds,
+                label = seconds,
+                transitionSpec = {timerTextAnimation()}
+            ) {seconds->
+                Text(text = seconds,
+                    style = MaterialTheme
+                        .typography
+                        .titleLarge
+                        .copy(fontSize = 45.sp)
+                )
+            }
+        }
 
-        Text(text = "00:05:45", style = MaterialTheme.typography.titleLarge.copy(fontSize = 45.sp))
 
     }
 
@@ -228,28 +330,56 @@ private fun ButtonsSection(
     modifier: Modifier,
     startButtonClick:()->Unit,
     cancelButtonClick:()->Unit,
-    finishButtonClick:()->Unit
+    finishButtonClick:()->Unit,
+    timerState: TimerState,
+    seconds: String
 ) {
 
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceBetween,
     ){
-        Button(onClick = cancelButtonClick) {
+        Button(
+            onClick = cancelButtonClick,
+            enabled = seconds != "00" && timerState!=TimerState.STARTED
+            ) {
             Text(
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                 text ="Cancel")
         }
-        Button(onClick = startButtonClick) {
+        Button(
+            onClick = startButtonClick,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if(timerState==TimerState.STARTED) Red
+                else MaterialTheme.colorScheme.primary,
+                contentColor = Color.White
+            )
+            ) {
             Text(
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                text ="Start")
+                text = when(timerState){
+                    TimerState.STARTED -> "Stop"
+                    TimerState.STOPPED -> "Resume"
+                    else  -> "Start"
+                }
+
+            )
         }
-        Button(onClick = finishButtonClick) {
+        Button(
+            onClick = finishButtonClick,
+            enabled = seconds != "00" && timerState!=TimerState.STARTED
+        ) {
             Text(
                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                 text ="Finish")
         }
     }
     
+}
+
+private fun timerTextAnimation(duration: Int =600) :ContentTransform{
+    return slideInVertically(animationSpec = tween(duration)) { fullHeight ->  fullHeight }+
+            fadeIn(animationSpec = tween(duration)) togetherWith
+            slideOutVertically (animationSpec = tween(duration)) { fullHeight ->  -fullHeight }+
+            fadeOut(animationSpec = tween(duration))
 }
