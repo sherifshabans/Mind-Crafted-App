@@ -1,6 +1,5 @@
 package com.elsharif.mindcrafted
 
-import android.Manifest
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -11,18 +10,14 @@ import android.os.IBinder
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.app.ActivityCompat
 import com.elsharif.mindcrafted.domain.model.Session
 import com.elsharif.mindcrafted.domain.model.Subject
 import com.elsharif.mindcrafted.domain.model.Task
-import com.elsharif.mindcrafted.presentation.NavGraph
 import com.elsharif.mindcrafted.presentation.NavGraphs
 import com.elsharif.mindcrafted.presentation.destinations.SessionScreenRouteDestination
 import com.elsharif.mindcrafted.presentation.session.StudySessionTimerServices

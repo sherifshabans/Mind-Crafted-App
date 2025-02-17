@@ -11,7 +11,6 @@ import com.elsharif.mindcrafted.domain.model.Task
 import com.elsharif.mindcrafted.domain.repository.SessionRepository
 import com.elsharif.mindcrafted.domain.repository.SubjectRepository
 import com.elsharif.mindcrafted.domain.repository.TaskRepository
-import com.elsharif.mindcrafted.presentation.dashboard.DashboardState
 import com.elsharif.mindcrafted.presentation.navArgs
 import com.elsharif.mindcrafted.util.SnackbarEvent
 import com.elsharif.mindcrafted.util.toHours
@@ -89,8 +88,12 @@ class SubjectViewModel @Inject constructor(
             }
             SubjectEvent.UpdateSubject -> updateSubject()
             SubjectEvent.DeleteSubject -> deleteSubject()
-            SubjectEvent.DeleteSession -> TODO()
-            is SubjectEvent.OnDeleteSessionButtonClick -> TODO()
+            SubjectEvent.DeleteSession -> deleteSession()
+            is SubjectEvent.OnDeleteSessionButtonClick -> {
+                _state.update {
+                    it.copy(session = event.session)
+                }
+            }
             is SubjectEvent.OnTaskIsCompleteChange -> {
                 updateTask(event.task)
             }
@@ -213,6 +216,25 @@ class SubjectViewModel @Inject constructor(
                 )
             }
 
+        }
+    }
+    private fun deleteSession(){
+        viewModelScope.launch {
+            try {
+                state.value.session?.let {session->
+                    sessionRepository.deleteSession(session = session)
+                    _snackbarEventFlow.emit(
+                        SnackbarEvent.ShowSnackbar(message = "Session deleted successfully.")
+                    )
+                }
+            }catch (e:Exception){
+                _snackbarEventFlow.emit(
+                    SnackbarEvent.ShowSnackbar(
+                        message = "Couldn't delete session. ${e.message}",
+                        duration= SnackbarDuration.Long
+                    )
+                )
+            }
         }
     }
 }
