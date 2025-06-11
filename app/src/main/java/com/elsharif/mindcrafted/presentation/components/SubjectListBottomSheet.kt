@@ -21,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.elsharif.mindcrafted.domain.model.Subject
-import com.elsharif.mindcrafted.subject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

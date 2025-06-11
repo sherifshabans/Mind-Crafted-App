@@ -117,7 +117,7 @@ fun AddSubjectDialog(
                        onValueChange =onGoalHoursChange,
                        label = { Text(text = "Goal Study Hours")},
                        singleLine = true,
-                       isError = goalHours != null && goalHours.isNotBlank(),
+                       isError = goalHoursError != null && goalHours.isNotBlank(),
                        supportingText = { Text(text = goalHoursError.orEmpty())},
                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                    )

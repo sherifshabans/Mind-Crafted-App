@@ -30,7 +30,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,10 +40,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.elsharif.mindcrafted.R
 import com.elsharif.mindcrafted.domain.model.Session
 import com.elsharif.mindcrafted.domain.model.Subject
@@ -60,14 +58,10 @@ import com.elsharif.mindcrafted.presentation.destinations.SubjectScreenRouteDest
 import com.elsharif.mindcrafted.presentation.destinations.TaskScreenRouteDestination
 import com.elsharif.mindcrafted.presentation.subject.SubjectScreenNavArgs
 import com.elsharif.mindcrafted.presentation.task.TaskScreenNavArgs
-import com.elsharif.mindcrafted.sessions
-import com.elsharif.mindcrafted.subject
-import com.elsharif.mindcrafted.tasks
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.elsharif.mindcrafted.util.SnackbarEvent
+import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootNavGraph
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.collectLatest
 
@@ -170,12 +164,12 @@ private fun DashboardScreen(
         title ="Delete Session?",
         bodyText ="Are you sure , you want to delete this session? Your studied hours will be reduced " +
                 "by this session time. This action can not be undone.",
-        onDismissRequest = { isAddSubjectDialogOpen=false },
+        onDismissRequest = { isDeleteSessionDialogOpen=false },
         onConfirmRequest = {
           onEvent(DashboardEvent.DeleteSession)
-            isAddSubjectDialogOpen=false
+            isDeleteSessionDialogOpen=false
 
-                           },
+             },
     )
 
     Scaffold(
@@ -274,17 +268,19 @@ private fun CountCardSection(
             count = "$subjectCount"
         )
         Spacer(modifier = Modifier.width(10.dp))
-        CountCard(
-            modifier = Modifier.weight(1f),
-            headingText ="Goal Study Hours",
-            count = goalHours
-        )
-        Spacer(modifier = Modifier.width(10.dp))
+
         CountCard(
             modifier = Modifier.weight(1f),
             headingText ="Studied Hours",
             count = studiedHours
         )
+        Spacer(modifier = Modifier.width(10.dp))
+        CountCard(
+            modifier = Modifier.weight(1f),
+            headingText ="Goal Study Hours",
+            count = goalHours
+        )
+
 
     }
 }

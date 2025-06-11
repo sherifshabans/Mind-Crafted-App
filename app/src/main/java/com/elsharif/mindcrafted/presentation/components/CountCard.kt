@@ -19,8 +19,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun CountCard(
     modifier: Modifier=Modifier,
-    headingText:String,
-    count:String
+    headingText:String="Hi",
+    count:String="5"
 ) {
     ElevatedCard(
         modifier = modifier

@@ -5,6 +5,8 @@ import androidx.compose.ui.graphics.Color
 import com.elsharif.mindcrafted.presentation.theme.Green
 import com.elsharif.mindcrafted.presentation.theme.Orange
 import com.elsharif.mindcrafted.presentation.theme.Red
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.text.DateFormat
 import java.time.Instant
 import java.time.LocalDate
@@ -33,11 +35,10 @@ fun Long?.changeMillisToDateString(): String {
     return date.format(DateTimeFormatter.ofPattern("dd MM yyyy"))
 }
 
-fun Long.toHours():Float{
+fun Long.toHours(): Float {
     val hours = this.toFloat() / 3600f
-    return "%.2f".format(hours).toFloat()
+    return BigDecimal(hours.toDouble()).setScale(2, RoundingMode.HALF_UP).toFloat()
 }
-
 sealed class SnackbarEvent{
 
     data class ShowSnackbar(

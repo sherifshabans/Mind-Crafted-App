@@ -1,5 +1,3 @@
-@file:Suppress("UNREACHABLE_CODE")
-
 package com.elsharif.mindcrafted.presentation.components
 
 import androidx.compose.material3.DatePicker
@@ -9,7 +7,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -34,16 +31,11 @@ fun TaskDatePicker(
                 Text(text = confirmButtonText)
             }
         },
-        modifier = TODO(),
         dismissButton = {
             TextButton(onClick = onDismissRequest) {
                 Text(text = dismissButtonText)
             }
         },
-        shape = TODO(),
-        tonalElevation = TODO(),
-        colors = TODO(),
-        properties = TODO(),
         content = {
             DatePicker(
                 state=state,

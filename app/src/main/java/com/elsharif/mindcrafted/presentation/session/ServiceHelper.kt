@@ -32,7 +32,7 @@ object ServiceHelper {
     fun triggerForegroundService(context: Context,action:String){
         Intent(context,StudySessionTimerServices::class.java).apply {
              this.action =action
-            context.stopService(this)
+            context.startService(this)
         }
     }
 }

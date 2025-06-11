@@ -25,8 +25,6 @@ import javax.inject.Inject
 class SessionViewModel @Inject constructor(
     private val subjectRepository: SubjectRepository,
     private val sessionRepository: SessionRepository,
-    private val taskRepository: TaskRepository,
-    savedStateHandle: SavedStateHandle
 ):ViewModel() {
 
 
@@ -50,15 +48,13 @@ class SessionViewModel @Inject constructor(
     val snackbarEventFlow =_snackbarEventFlow.asSharedFlow()
 
 
-    fun onEvent(event: SessionEvent){
-        when(event){
+    fun onEvent(event: SessionEvent) {
+        when (event) {
             SessionEvent.NotifyToUpdateSubject -> notifyToUpdateSubject()
             SessionEvent.DeleteSession -> deleteSession()
             is SessionEvent.OnDeleteSessionButtonClick -> {
                 _state.update {
-                    it.copy(
-                        session = event.session
-                    )
+                    it.copy(session = event.session)
                 }
             }
             is SessionEvent.OnRelatedSubjectChange -> {
@@ -69,6 +65,7 @@ class SessionViewModel @Inject constructor(
                     )
                 }
             }
+
             is SessionEvent.SaveSession -> insertSession(event.duration)
             is SessionEvent.UpdateSubjectIdAndRelatedSubject -> {
                 _state.update {
@@ -80,7 +77,6 @@ class SessionViewModel @Inject constructor(
             }
         }
     }
-
     private fun notifyToUpdateSubject() {
         viewModelScope.launch {
             if(state.value.subjectId ==null || state.value.relatedToSubject==null){

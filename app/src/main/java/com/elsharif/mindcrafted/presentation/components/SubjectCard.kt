@@ -44,7 +44,7 @@ fun SubjectCard(
             verticalArrangement = Arrangement.Center
         ) {
             Image(
-                painter = painterResource(id = R.drawable.img_books ),
+                painter = painterResource(id = R.drawable.img_books),
                 contentDescription =subjectName,
                 modifier = Modifier.size(80.dp)
                 )

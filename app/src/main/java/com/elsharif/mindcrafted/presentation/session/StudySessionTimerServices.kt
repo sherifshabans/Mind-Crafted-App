@@ -7,7 +7,6 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.Build
-import android.os.IBinder
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
 import com.elsharif.mindcrafted.util.Constants.ACTION_SERVICE_CANCEL
@@ -17,6 +16,7 @@ import com.elsharif.mindcrafted.util.Constants.NOTIFICATION_CHANNEL_ID
 import com.elsharif.mindcrafted.util.Constants.NOTIFICATION_CHANNEL_NAME
 import com.elsharif.mindcrafted.util.Constants.NOTIFICATION_ID
 import com.elsharif.mindcrafted.util.pad
+
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.Timer
 import javax.inject.Inject
@@ -24,9 +24,8 @@ import kotlin.concurrent.fixedRateTimer
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-
 @AndroidEntryPoint
-class StudySessionTimerServices  :Service(){
+class StudySessionTimerServices : Service() {
 
     @Inject
     lateinit var notificationManager: NotificationManager
@@ -34,44 +33,38 @@ class StudySessionTimerServices  :Service(){
     @Inject
     lateinit var notificationBuilder: NotificationCompat.Builder
 
-    private val binder =StudySessionTimerBinder()
+    private val binder = StudySessionTimerBinder()
 
     private lateinit var timer: Timer
-
-    var duration :Duration =Duration.ZERO
+    var duration: Duration = Duration.ZERO
         private set
-
     var seconds = mutableStateOf("00")
         private set
-
     var minutes = mutableStateOf("00")
         private set
-
     var hours = mutableStateOf("00")
         private set
-
     var currentTimerState = mutableStateOf(TimerState.IDLE)
         private set
-
     var subjectId = mutableStateOf<Int?>(null)
 
-    override fun onBind(intent: Intent?) =binder
+    override fun onBind(p0: Intent?) = binder
 
-
-    
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent?.action.let {
-            when(it){
-                ACTION_SERVICE_START ->{
+            when (it) {
+                ACTION_SERVICE_START -> {
                     startForegroundService()
-                    startTimer{hours,minutes,seconds ->
-                        updateNotification(hours,minutes,seconds)
+                    startTimer { hours, minutes, seconds ->
+                        updateNotification(hours, minutes, seconds)
                     }
                 }
-                ACTION_SERVICE_STOP ->{
 
+                ACTION_SERVICE_STOP -> {
+                    stopTimer()
                 }
-                ACTION_SERVICE_CANCEL ->{
+
+                ACTION_SERVICE_CANCEL -> {
                     stopTimer()
                     cancelTimer()
                     stopForegroundService()
@@ -81,24 +74,22 @@ class StudySessionTimerServices  :Service(){
         return super.onStartCommand(intent, flags, startId)
     }
 
-
     @SuppressLint("ForegroundServiceType")
-    private fun startForegroundService(){
+    private fun startForegroundService() {
         createNotificationChannel()
-        startForeground(NOTIFICATION_ID,notificationBuilder.build())
+        startForeground(NOTIFICATION_ID, notificationBuilder.build())
     }
 
-    @SuppressLint("ObsoleteSdkInt")
-    private fun stopForegroundService(){
+    private fun stopForegroundService() {
         notificationManager.cancel(NOTIFICATION_ID)
-        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.N)
-        stopForeground(STOP_FOREGROUND_REMOVE)
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        }
         stopSelf()
     }
 
-    private fun createNotificationChannel(){
-        if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.O){
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 NOTIFICATION_CHANNEL_ID,
                 NOTIFICATION_CHANNEL_NAME,
@@ -106,10 +97,9 @@ class StudySessionTimerServices  :Service(){
             )
             notificationManager.createNotificationChannel(channel)
         }
-
     }
 
-    private fun updateNotification(hours: String, minutes: String, seconds: String){
+    private fun updateNotification(hours: String, minutes: String, seconds: String) {
         notificationManager.notify(
             NOTIFICATION_ID,
             notificationBuilder
@@ -119,49 +109,52 @@ class StudySessionTimerServices  :Service(){
     }
 
     private fun startTimer(
-        onTick:(h:String, m:String, s:String)->Unit
-    ){
-        currentTimerState.value =TimerState.STARTED
-        timer = fixedRateTimer(initialDelay = 1000L, period = 1000L){
-            duration=duration.plus(1.seconds)
+        onTick: (h: String, m: String, s: String) -> Unit
+    ) {
+        currentTimerState.value = TimerState.STARTED
+        timer = fixedRateTimer(initialDelay = 1000L, period = 1000L) {
+            duration = duration.plus(1.seconds)
             updateTimeUnits()
-            onTick(hours.value,minutes.value,seconds.value)
+            onTick(hours.value, minutes.value, seconds.value)
         }
-
     }
 
-    private fun stopTimer(){
-        if(this::timer.isInitialized){
+    private fun stopTimer() {
+        if (this::timer.isInitialized) {
             timer.cancel()
         }
-
-        currentTimerState.value=TimerState.STOPPED
-
+        currentTimerState.value = TimerState.STOPPED
     }
 
-    private fun cancelTimer(){
+    private fun cancelTimer() {
         duration = Duration.ZERO
         updateTimeUnits()
-        currentTimerState.value=TimerState.IDLE
+        currentTimerState.value = TimerState.IDLE
     }
 
-    private fun updateTimeUnits(){
-        duration.toComponents{hours, minutes, seconds, _ ->
-            this@StudySessionTimerServices.hours.value=hours.toInt().pad()
-            this@StudySessionTimerServices.minutes.value=minutes.pad()
-            this@StudySessionTimerServices.seconds.value=seconds.pad()
+    private fun updateTimeUnits() {
+        duration.toComponents { hours, minutes, seconds, _ ->
+            this@StudySessionTimerServices.hours.value = hours.toInt().pad()
+            this@StudySessionTimerServices.minutes.value = minutes.pad()
+            this@StudySessionTimerServices.seconds.value = seconds.pad()
         }
     }
 
-    inner class StudySessionTimerBinder :Binder(){
-        fun getService():StudySessionTimerServices =this@StudySessionTimerServices
+    inner class StudySessionTimerBinder : Binder() {
+        fun getService(): StudySessionTimerServices = this@StudySessionTimerServices
     }
-
-
 }
 
-enum class TimerState{
+enum class TimerState {
     IDLE,
     STARTED,
     STOPPED
 }
+
+
+
+
+
+
+
+
