@@ -1,4 +1,5 @@
 **The Mind Crafted Info**
+
 "Mind Crafted" is a modern productivity application developed using Kotlin and Jetpack Compose. It follows the principles of Clean Architecture, ensuring separation of concerns, scalability, and testability. The app is structured using the Model-View-ViewModel (MVVM) pattern and integrates the Room Database for efficient and persistent local data storage. The use of clean code practices enhances the readability and maintainability of the codebase.
 
 
