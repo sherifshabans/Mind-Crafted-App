@@ -19,7 +19,7 @@ A program for the work of the lawyer, which is an addition to cases, storing the
 **images**
 
 
-![Other Screens](https://github.com/sherifshabans/Office_App/blob/main/image/Other%20Screens.png)
+![ Screens]([https://github.com/sherifshabans/Mind-Crafted-App/blob/main/image/Other%20Screens%20.png](https://github.com/sherifshabans/Mind-Crafted-App/blob/main/image/Other%20Screens%20.png))
 
 **Other Screens**
 
